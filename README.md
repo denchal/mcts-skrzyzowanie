@@ -4,12 +4,23 @@ W tym opisie postaram się zawrzeć wszystkie informacje związane z tym projekt
 
 Chciałem się skupić na konkretnym typie skrzyżowań - stare skrzyżowania z jednym pasem w wjeżdżającym i jednym wyjeżdżającym. Takie, które nie zostały w żaden sposób przystosowane do zwiększonego ruchu (bo na przykład były budowane 25 lat temu) i czekają na przebudowanie. Zastosowany algorytm ma na celu jak najszybciej rozładowywać ruch na takim skrzyżowaniu.
 
+## Przybliżenie rzeczywistego zachowania na skrzyżowaniu
+
+Starając się przybliżyć rzeczywistość przyjąłem pewne założenia:
+
+ - Pewne kierunki blokują się, wtedy pierwszeństwo ma osoba po prawej stronie, przykładowo jeżeli samochód z południa jedzie prosto, a ze wschodu chce skręcić w lewo, to przejedzie tylko samochód ze wschodu (nie jest to nic nierealistycznego, tak samo działa np. skrzyżowanie pod moim domem).
+ - Gdy dwa samochody jadą w to samo miejsce, na przykład jednocześnie na wschód z północy i południa, to nie blokują się one - samochód z południa znajdzie się na drodze szybciej od tego z północy, więc oba zdążą przejechać.
+ - Zawracanie na skrzyżowaniu jest niedozwolone.
+ - Maksymalną liczbą zielonych świateł jest 2.
+ - Kierowcy zawsze jeżdżą zgodnie z przepisami i światłami ;)
+ - Brak światła żółtego w symulacji - jedyną zmianą byłaby zmiana wizualna/opóźnienie o 1 krok.
+ - Wprowadzenie minimalnego czasu trwania danego ustawienia świateł - żeby nie "mrugać" światłami co jeden krok.
 
 ## Wybór algorytmu
 
-Po krótkim zastanowieniu uznałem, że ciekawym pomysłem będzie użycie mojego ulubionego algorytmu - Monte Carlo Tree Search (tu w zasadzie z tree została sadzonka, Flat Monte Carlo Search). Jest to algorytm który w ramach zadania można właściwie potraktować jak czarną skrzynkę - podajemy mu możliwe ustawienia świateł i on, przeprowadzając dużą liczbę losowych symulacji, decyduje, które z ustawień jest najlepsze. 
-Jest on najczęściej stosowany w grach jak szachy, go, warcaby, kółko i krzyżyk..., lecz na tym jego zastosowania się nie kończą, co pokazują wyniki tego eksperymentu.
-Najbardziej na ten wybór nakierował mnie podział w pliku JSON na kolejne kroki symulacji, co idealnie przygotowuje pole pod ten algorytm.
+Po krótkim zastanowieniu uznałem, że ciekawym pomysłem będzie użycie mojego ulubionego algorytmu - Monte Carlo Tree Search (tu w zasadzie z tree niewiele zostało - Flat Monte Carlo Search). Jest to algorytm, który w tym przypadku na wejściu otrzymuje możliwe ustawienia świateł i, przeprowadzając dużą liczbę losowych symulacji, decyduje, które z ustawień jest najlepsze w danym celu.
+Jest on najczęściej stosowany w grach takich jak szachy, go, warcaby, kółko i krzyżyk..., lecz na tym jego zastosowania się nie kończą, co pokazują wyniki tego eksperymentu.
+Najbardziej na ten wybór nakierował mnie podział w pliku JSON na kolejne kroki symulacji, co idealnie przygotowuje pole pod ten algorytm, oraz to, że napływ samochodów jest względnie losowy (ale możliwe jest wprowadzenie danych o ruchu przy małych modyfikacjach algorytmu).
 Dla zainteresowanych polecam świetny (i krótki!) film o istocie pełnego algorytmu MCTS: https://www.youtube.com/watch?v=UXW2yZndl7U
 
 ## Heurystyka
@@ -22,7 +33,7 @@ Sumując po kolejnych kierunkach. Bierze się to stąd, że jeśli na danym pasi
 
 ## Zalety MCTS
 
-Po za brakiem heurystyki ważną zaletą jest to, że MCTS nie wymaga idealnego modelowania, ani pełni danych - co jest tu moim zdaniem kluczowe, bo jakie skrzyżowanie będzie wiedziało czy ktoś planuje jechać prosto, czy w prawo? Podanie takich informacji algorytmowi to lekkie nagięcie rzeczywistości.
+Po za brakiem heurystyki ważną zaletą jest to, że MCTS nie wymaga idealnego modelowania, ani pełni danych - co jest tu moim zdaniem kluczowe, bo jakie skrzyżowanie będzie wiedziało, czy ktoś planuje jechać prosto, czy w prawo? Podanie takich informacji algorytmowi to lekkie nagięcie rzeczywistości.
 W zastosowanym przeze mnie podejściu MCTS dostaje jedynie informacje: na drodze X stoi Y samochodów, aktualnie są zapalone takie światła. Zostawia to dodatkowo sporo pola do poprawy, przykładowo, jeżeli mamy dane o tym, jak kształtuje się ruch o danej porze dnia, możemy łatwo wprowadzić to do algorytmu, a on **sam będzie priorytetyzował kierunki z większym ruchem**!
 
 ## Wady MCTS
@@ -31,17 +42,6 @@ Jednak za cel uznałem rozładowywanie dużego ruchu, a ten problem jest dość 
 Inną możliwą zmianą w tym wypadku jest uruchamianie tego modelu dopiero gdy ruch przekracza możliwości stałych zmian świateł.
 Zdecydowałem się jednak nie wprowadzać żadnych z tym zmian, aby nie komplikować dodatkowo algorytmu, oraz korzystać z założeń - ruchu większego niż ten, do którego przystosowane jest skrzyżowanie.
 
-
-## Przybliżenie rzeczywistego zachowania na skrzyżowaniu
-
-Starając się przybliżyć rzeczywistość przyjąłem pewne założenia:
-
- - Pewne kierunki blokują się, wtedy pierwszeństwo ma osoba po prawej stronie, przykładowo jeżeli samochód z południa jedzie prosto, a ze wschodu chce skręcić w lewo, to przejedzie tylko samochód ze wschodu.
- - Gdy dwa samochody jadą w to samo miejsce, na przykład jednocześnie na wschód z północy i południa, to nie blokują się one - samochód z południa znajdzie się na drodze szybciej od tego z północy, więc oba zdążą przejechać.
- - Zdecydowałem się na uniemożliwienie zawracania na skrzyżowaniu.
- - Kierowcy zawsze jeżdżą zgodnie z przepisami i światłami ;)
- - Uznałem, że nie ma sensu wprowadzać światła żółtego w symulacji - jedyną zmianą byłaby zmiana wizualna.
- - Wprowadzenie minimalnego czasu trwania danego ustawienia świateł - żeby nie "mrugać" światłami co jeden krok.
 
 ## Aplikacja
 
@@ -58,25 +58,25 @@ Wspomniane 100 kroków na sekundę nie stanowi problemu dla algorytmu, co świad
 Aplikację uruchamia się następująco:
 Dla symulacji losowej:
 ```bash
-gradlew run --args"--MAX_COLOR_CHANGE_FREQUENCY=int --MAX_NEW_CARS=int"
+gradlew run
 ```
 lub
 ```bash
-gradlew run
+gradlew run --args="--FREQUENCY=int --NEW_CARS=int"
 ```
 Dla symulacji z pliku JSON
 ```bash
-gradlew run --args"--MAX_COLOR_CHANGE_FREQUENCY=int --in=path --out=path"
+gradlew run --args="--in=path"
 ```
 lub
 ```bash
-gradlew run --args"--in=path"
+gradlew run --args="--in=path --out=path"
 ```
 lub
 ```bash
-gradlew run --args"--in=path --out=path"
+gradlew run --args="--FREQUENCY=int --in=path --out=path"
 ```
-Gdzie parametr MAX_COLOR_CHANGE_FREQUENCY to minimalny czas pomiędzy zmianą świateł, liczony w krokach, aby zwiększyć realizm, a parametr MAX_NEW_CARS określa ile maksymalnie nowych aut w symulacji losowej może się pojawić w danym kroku, losowo od 1 do MAX_NEW_CARS. Można również uruchomić symulację bez żadnych, lub bez jednego parametru, wtedy przypisana zostanie wartość domyślna.
+Gdzie parametr FREQUENCY to minimalny czas pomiędzy zmianą świateł, liczony w krokach, aby zwiększyć realizm, a parametr NEW_CARS określa ile maksymalnie nowych aut w symulacji losowej może się pojawić w danym kroku, losowo od 1 do NEW_CARS. Można również uruchomić symulację bez żadnych, lub bez jednego parametru, wtedy przypisana zostanie wartość domyślna.
 
 ## Testy
 W celu uruchomienia testów należy wykonać polecenie:
@@ -85,7 +85,7 @@ gradlew clean test
 ```
 
 Z uwagi na losowość algorytmu nie zawsze wybierze on to samo ustawienie w takim samym układzie samochodów, chyba, że będzie ono **znacznie lepsze** od pozostałych, w związku z czym testy samego algorytmu ograniczają się właśnie do takich przypadków.
-Dodatkowo przetestowałem i odpowiednio zabezpieczyłem także różne błędy wejścia m. in. niepełne dane, błędne kierunki, literówki, dzięki czemu nawet jeśli wystąpi błąd w trakcie odczytu pliku to błędna komenda zostanie pominięta, bez powodowania zawieszenia całej aplikacji.
+Dodatkowo przetestowałem i odpowiednio zabezpieczyłem także różne błędy wejścia m. in. niepełne dane, błędne kierunki, literówki, dzięki czemu nawet jeśli wystąpi błąd w trakcie odczytu pliku to błędna komenda zostanie pominięta, bez powodowania zawieszenia całej aplikacji, a sam błąd zostanie wypisany w konsoli.
 
 ## Struktura pliku JSON
 
@@ -111,24 +111,17 @@ Dostępne komendy to addVehicle oraz step. vehicleId może być dowolnym napisem
 Jeżeli zostanie podany poprawny parametr in wraz z parametrem out, wyjście będzie wyglądać następująco:
 ```json
 {  
-  "stepStatuses" : [ 
-  {  
-    "leftVehicles" : [ "vehicle2" ]  
-  }, 
-  {  
-    "leftVehicles" : [ ]  
-  }, 
-  {  
-    "leftVehicles" : [ "vehicle3" ]  
-  }, 
-  {  
-    "leftVehicles" : [ "vehicle4" ]  
-  } 
+  "stepStatuses" : [  
+    {  
+      "leftVehicles" : [  
+        "vehicle1"  
+  ]  
+    } 
   ]  
 }
 ```
 Gdzie leftVehicles to samochody które opuściły skrzyżowanie w danym kroku symulacji.
 
 ## Podsumowanie
-MCTS jest dobrze działającym podejściem w tym przypadku, poradziłby sobie jeszcze lepiej gdyby wprowadzić zagregowane, uśrednione informacje o ruchu w danym momencie (przykładowo: wiemy, że w piątki o 15:00 70% samochodów napływa z kierunku północnego, w tym 50% jedzie prosto a pozostałe są równo dzielone pomiędzy pozostałe kierunki), mając takie dane efektywność algorytmu zwiększyłaby się przynajmniej o kilkadziesiąt procent.
-W moich dłuższych testach na losowych danych średni czas oczekiwania zbiega do 11-12 kroków symulacji, co jest moim zdaniem bardzo dobrym wynikiem - to średnio ~30 sekund oczekiwania na przejazd, lepiej niż na niejednym skrzyżowaniu!
+MCTS jest dobrze działającym podejściem w tym przypadku, poradziłby sobie jeszcze lepiej gdyby wprowadzić zagregowane, uśrednione informacje o ruchu w danym momencie (przykładowo: wiemy, że w piątki o 15:00 70% samochodów napływa z kierunku północnego, w tym 50% jedzie prosto a pozostałe są równo dzielone pomiędzy pozostałe kierunki), mając takie dane efektywność algorytmu zwiększyłaby się przynajmniej o kilkanaście procent.
+W moich dłuższych testach na losowych danych, przy założeniu braku wydłużania symulacji przez żółte światła, oraz z domyślnymi ustawieniami symulacji, średni czas oczekiwania zbiega do 11-12 kroków symulacji, co jest moim zdaniem bardzo dobrym wynikiem - to średnio ~30 sekund oczekiwania na przejazd, lepiej niż na niejednym skrzyżowaniu!

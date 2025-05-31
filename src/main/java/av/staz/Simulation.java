@@ -1,6 +1,9 @@
 package av.staz;
 
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,7 +77,10 @@ public class Simulation {
         Map<String, Object> result = new HashMap<>();
         result.put("stepStatuses", stepStatuses);
         ObjectMapper mapper = new ObjectMapper();
-        mapper.writerWithDefaultPrettyPrinter().writeValue(new File("output.json"), result);
+        ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter()
+                .withArrayIndenter(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE));
+        writer.writeValue(new File(path), result);
+
 
     }
 

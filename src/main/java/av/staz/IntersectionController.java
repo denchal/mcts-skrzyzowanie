@@ -6,7 +6,9 @@ import javafx.animation.AnimationTimer;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.InvalidKeyException;
 import java.util.Map;
+import java.util.Objects;
 
 public class IntersectionController {
     private final Simulation simulation;
@@ -35,28 +37,21 @@ public class IntersectionController {
         }.start();
     }
 
-    public void runJsonCommands(Map<String, String> args) {
+    public void runJsonCommands(Map<String, String> args) throws NoSuchFieldException, IOException, InvalidKeyException {
         ObjectMapper mapper = new ObjectMapper();
         File jsonFile = new File(args.get("in"));
         if (!jsonFile.exists()) {
-            System.err.println("Błąd: plik wejściowy '" + args.get("in") + "' nie istnieje.");
-            System.exit(1);
+            throw new NoSuchFieldException("Błąd: plik wejściowy '" + args.get("in") + "' nie istnieje.");
         }
         JsonNode jsonRoot;
         try {
             jsonRoot = mapper.readTree(jsonFile);
         } catch (IOException e) {
-            System.err.println("Błąd: nie udało się wczytać pliku JSON: " + e.getMessage());
-            System.exit(1);
-            return;
+            throw new IOException("Błąd: nie udało się wczytać pliku JSON: " + e.getMessage());
         }
-        JsonNode commands;
-        try {
-            commands = jsonRoot.get("commands");
-        } catch (Exception e) {
-            System.err.println("Błąd: nie znaleziono 'commands' wewnątrz pliku JSON: " + e.getMessage());
-            System.exit(1);
-            return;
+        JsonNode commands = jsonRoot.get("commands");
+        if (commands == null) {
+            throw new InvalidKeyException("Błąd: brak 'commands' wewnątrz pliku json!");
         }
 
         new AnimationTimer() {
@@ -76,28 +71,8 @@ public class IntersectionController {
                     stop();
                     return;
                 }
-
                 if (now - lastUpdate >= 1_000_000_000 / (view.getSimulationSpeed() + 1e-6)) {
-                    JsonNode command = commands.get(idx++);
-                    String type = "";
-                    try {
-                        type = command.get("type").asText();
-                    } catch (Exception e) {
-                        System.err.println("Błąd: brak typu operacji: " + e.getMessage());
-                    }
-                    switch (type) {
-                        case "addVehicle" -> {
-                            simulation.addCarJson(
-                                    command.get("vehicleId").asText(),
-                                    Direction.fromString(command.get("startRoad").asText()),
-                                    Direction.fromString(command.get("endRoad").asText()));
-                        }
-                        case "step" -> simulation.stepJson();
-                        default -> System.err.println("Błąd: błędny typ operacji!");
-                    }
-
-                    view.draw(simulation);
-                    view.updateStats(simulation);
+                    runJsonCommand(commands.get(idx++), idx);
                     lastUpdate = now;
                 } else {
                     view.updateStats(simulation);
@@ -105,4 +80,45 @@ public class IntersectionController {
             }
         }.start();
     }
+
+    public void runJsonCommand(JsonNode command, int idx) {
+        JsonNode commandName = command.get("type");
+        if (commandName == null) {
+            System.err.println("Błąd: błędny typ operacji w komendzie: " + idx);
+            return;
+        }
+        String type = command.get("type").asText();
+        if (Objects.equals(type, "")) {
+            System.err.println("Błąd: brak typu operacji w komendzie: " + idx);
+            return;
+        }
+        switch (type) {
+            case "addVehicle" -> {
+                JsonNode vehicleName = command.get("vehicleId");
+                if (vehicleName == null) {
+                    System.err.println("Błąd: brak vehicleId w komendzie: " + idx);
+                    return;
+                }
+                JsonNode startName = command.get("startRoad");
+                if (startName == null) {
+                    System.err.println("Błąd: brak startRoad w komendzie: " + idx);
+                    return;
+                }
+                JsonNode endName = command.get("endRoad");
+                if (endName == null) {
+                    System.err.println("Błąd: brak endRoad w komendzie: " + idx);
+                    return;
+                }
+                simulation.addCarJson(
+                        vehicleName.asText(),
+                        Direction.fromString(startName.asText()),
+                        Direction.fromString(endName.asText()));
+            }
+            case "step" -> simulation.stepJson();
+            default -> System.err.println("Błąd: błędny typ operacji w komendzie: " + idx);
+        }
+        view.draw(simulation);
+        view.updateStats(simulation);
+    }
+
 }

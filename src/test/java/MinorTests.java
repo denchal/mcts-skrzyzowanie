@@ -1,6 +1,6 @@
-import av.staz.Car;
-import av.staz.Direction;
+import av.staz.*;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MinorTests {
@@ -14,5 +14,6 @@ public class MinorTests {
         assertEquals(true, car.isDone());
         assertEquals(Direction.SOUTH, car.getStart());
     }
+
 
 }

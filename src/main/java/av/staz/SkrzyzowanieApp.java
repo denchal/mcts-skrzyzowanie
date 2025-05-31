@@ -9,32 +9,27 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
 import java.util.Map;
 
 public class SkrzyzowanieApp extends Application {
+    static int NEW_CARS_DEFAULT = 2;
+    static int FREQUENCY_DEFAULT = 10;
 
     @Override
-    public void start(Stage primaryStage) throws IOException {
+    public void start(Stage primaryStage) throws IOException, NoSuchFieldException, InvalidKeyException {
         Parameters params = getParameters();
         Map<String, String> args = params.getNamed();
 
-        int MAX_NEW_CARS = 2;
-        int MAX_COLOR_CHANGE_FREQUENCY = 10;
+        int newCars = NEW_CARS_DEFAULT;
+        int frequency = FREQUENCY_DEFAULT;
 
-        if (args.containsKey("MAX_NEW_CARS")) {
-            try {
-                MAX_NEW_CARS = Integer.parseInt(args.getOrDefault("MAX_NEW_CARS", "2"));
-            } catch (NumberFormatException e) {
-                System.err.println("Błąd: wartość 'MAX_NEW_CARS' musi być dodatnią liczbą całkowitą. Otrzymano: " + args.get("MAX_NEW_CARS") + "\n" + "Kontynuuję z domyślną wartością (2)");
-            }
+        if (args.containsKey("NEW_CARS")) {
+            newCars = maxCarNumCheck(args);
         }
 
-        if (args.containsKey("MAX_COLOR_CHANGE_FREQUENCY")) {
-            try {
-                MAX_COLOR_CHANGE_FREQUENCY = Integer.parseInt(args.getOrDefault("MAX_COLOR_CHANGE_FREQUENCY", "10"));
-            } catch (NumberFormatException e) {
-                System.err.println("Błąd: wartość 'MAX_COLOR_CHANGE_FREQUENCY' musi być dodatnią liczbą całkowitą. Otrzymano: " + args.get("MAX_COLOR_CHANGE_FREQUENCY") + "\n" + "Kontynuuję z domyślną wartością (10)");
-            }
+        if (args.containsKey("FREQUENCY")) {
+            frequency = maxLightFrequencyCheck(args);
         }
 
 
@@ -53,7 +48,7 @@ public class SkrzyzowanieApp extends Application {
         primaryStage.show();
 
         Intersection intersection = new Intersection();
-        Simulation simulation = new Simulation(intersection, MAX_COLOR_CHANGE_FREQUENCY, MAX_NEW_CARS);
+        Simulation simulation = new Simulation(intersection, frequency, newCars);
         IntersectionView view = new IntersectionView(canvas, stats, slider);
         IntersectionController controller = new IntersectionController(simulation, view);
 
@@ -62,6 +57,38 @@ public class SkrzyzowanieApp extends Application {
         } else {
             controller.startSimulationLoop();
         }
+    }
+
+    public static int maxCarNumCheck(Map<String, String> args) {
+        int NEW_CARS = NEW_CARS_DEFAULT;
+        try {
+            NEW_CARS = Integer.parseInt(args.get("NEW_CARS"));
+        } catch (NumberFormatException e) {
+            System.err.println("Błąd: wartość 'NEW_CARS' musi być dodatnią liczbą całkowitą. Otrzymano: " + args.get("NEW_CARS") + "\n" + "Kontynuuję z domyślną wartością (" + NEW_CARS_DEFAULT + ")");
+        }
+
+        if (NEW_CARS <= 0) {
+            System.err.println("Błąd: wartość 'NEW_CARS' musi być dodatnią liczbą całkowitą. Otrzymano: " + args.get("NEW_CARS") + "\n" + "Kontynuuję z domyślną wartością (" + NEW_CARS_DEFAULT + ")");
+            NEW_CARS = NEW_CARS_DEFAULT;
+        }
+
+        return NEW_CARS;
+    }
+
+    public static int maxLightFrequencyCheck(Map<String, String> args) {
+        int FREQUENCY = FREQUENCY_DEFAULT;
+        try {
+            FREQUENCY = Integer.parseInt(args.get("FREQUENCY"));
+        } catch (NumberFormatException e) {
+            System.err.println("Błąd: wartość 'FREQUENCY' musi być dodatnią liczbą całkowitą. Otrzymano: " + args.get("FREQUENCY") + "\n" + "Kontynuuję z domyślną wartością (" + FREQUENCY_DEFAULT + ")");
+        }
+
+        if (FREQUENCY <= 0) {
+            System.err.println("Błąd: wartość 'FREQUENCY' musi być dodatnią liczbą całkowitą. Otrzymano: " + args.get("FREQUENCY") + "\n" + "Kontynuuję z domyślną wartością (" + FREQUENCY_DEFAULT + ")");
+            FREQUENCY = FREQUENCY_DEFAULT;
+        }
+
+        return FREQUENCY;
     }
 
     public static void main(String[] args) {
