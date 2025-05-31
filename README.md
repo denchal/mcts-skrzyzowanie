@@ -101,6 +101,7 @@ Dodatkowo przetestowałem i odpowiednio zabezpieczyłem także różne błędy w
   {
 	  "type": "step"
   }
+  ]
 }
 ```
 
