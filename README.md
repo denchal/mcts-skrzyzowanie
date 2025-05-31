@@ -38,7 +38,7 @@ W zastosowanym przeze mnie podejściu MCTS dostaje jedynie informacje: na drodze
 
 ## Wady MCTS
 Główną znalezioną przeze mnie wadą tego podejścia są problemy przy bardzo małym ruchu, niektóre kierunki potrafią mieć przez to potencjalnie wydłużone czasy oczekiwania, gdyż stoi tam na przykład tylko 1 samochód. <br>
-Jednak za cel uznałem rozładowywanie dużego ruchu, a ten problem jest dość prosty do poprawienia, stosując niewiele zmieniony algorytm MCTS uwzględniający obecne czasy oczekiwania na przejazd (do momentu uruchomienia symulacji) pierwszych samochodów, lub znalezienie innej wartości do optymalizacji - zamiast średniego czasu oczekiwania możemy przykładowo **minimalizować maksymalny czas oczekiwania**.
+Jednak za cel uznałem rozładowywanie dużego ruchu, a ten problem jest dość prosty do poprawienia, stosując niewiele zmieniony algorytm MCTS uwzględniający obecne czasy oczekiwania na przejazd (do momentu uruchomienia symulacji) pierwszych samochodów, lub znalezienie innej wartości do optymalizacji - zamiast średniego czasu oczekiwania możemy przykładowo **minimalizować maksymalny czas oczekiwania**. <br>
 Inną możliwą zmianą w tym wypadku jest uruchamianie tego modelu dopiero gdy ruch przekracza możliwości stałych zmian świateł. <br>
 Zdecydowałem się jednak nie wprowadzać żadnych z tym zmian, aby nie komplikować dodatkowo algorytmu, oraz korzystać z założeń - ruchu większego niż ten, do którego przystosowane jest skrzyżowanie.
 
